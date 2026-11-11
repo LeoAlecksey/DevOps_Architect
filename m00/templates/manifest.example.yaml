@@ -1,0 +1,43 @@
+# .course/manifest.yaml — пример схемы. Значения вымышленные.
+# Файл говорит инструменту, где что лежит и что вы выбрали.
+# Пути — относительно корня репозитория; раскладывайте файлы как удобно, но пути здесь должны быть верными.
+schema: 1
+
+profile: light            # light | standard — должно совпадать с вашим железом
+
+host:
+  ram_gb: 16              # сколько памяти у компьютера, округлённо до GB
+  cores: 4                # логические ядра
+
+hypervisor:
+  name: kvm-libvirt       # kvm-libvirt | virtualbox | vmware | other
+  adr: docs/ADR-0001-hypervisor.md
+
+docker:
+  access: sudo            # sudo | docker-group | rootless — как вы обращаетесь к демону
+  daemon_json: infra/docker/daemon.json   # копия /etc/docker/daemon.json в репозитории
+  adr: docs/ADR-0002-docker.md
+
+signing:
+  key_fingerprint: "SHA256:замените-на-отпечаток-вашего-ключа-подписи"
+  allowed_signers: docs/allowed_signers
+  adr: docs/ADR-0003-signing.md
+
+remote:
+  path: /mnt/backup/lab-infra.git         # bare-репозиторий вне диска лаборатории
+
+control:
+  script: bin/lab         # точка входа скрипта управления
+  language: bash          # bash | python
+
+lab:
+  test_vm: m00-test       # имя тестовой VM в гипервизоре
+  test_vm_ssh: m00-test   # куда подключается ssh: имя из ~/.ssh/config или user@адрес
+  vm_procedure: infra/vm/create.sh        # процедура создания VM (скрипт или описание команд)
+  os_image: /var/lib/libvirt/images/base/os-cloud.img   # проверенный образ ОС, остаётся после удаления VM
+  test_compose: infra/compose/test        # каталог тестового Compose-проекта
+
+docs:
+  capacity_baseline: docs/capacity-baseline.md
+  postmortem: docs/postmortem-m00.md
+  self_defense: docs/self-defense-m00.md

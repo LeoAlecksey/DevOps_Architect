@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lab status --json (M0)",
+  "type": "object",
+  "required": ["schema", "time", "host", "docker", "hypervisor", "test_compose"],
+  "additionalProperties": true,
+  "properties": {
+    "schema": { "const": 1 },
+    "time": { "type": "string", "format": "date-time" },
+    "host": {
+      "type": "object",
+      "required": ["ram_total_mb", "ram_available_mb", "swap_used_mb", "cores", "disks"],
+      "properties": {
+        "ram_total_mb": { "type": "integer", "minimum": 1 },
+        "ram_available_mb": { "type": "integer", "minimum": 0 },
+        "swap_used_mb": { "type": "integer", "minimum": 0 },
+        "cores": { "type": "integer", "minimum": 1 },
+        "disks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["path", "free_gb"],
+            "properties": {
+              "path": { "type": "string" },
+              "free_gb": { "type": "number", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "docker": {
+      "type": "object",
+      "required": ["running", "containers_running"],
+      "properties": {
+        "running": { "type": "boolean" },
+        "containers_running": { "type": "integer", "minimum": 0 },
+        "log_driver": { "type": "string" },
+        "listens_tcp": { "type": "boolean" }
+      }
+    },
+    "hypervisor": {
+      "type": "object",
+      "required": ["available", "vms"],
+      "properties": {
+        "available": { "type": "boolean" },
+        "vms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "state", "memory_mb"],
+            "properties": {
+              "name": { "type": "string" },
+              "state": { "enum": ["running", "stopped", "other"] },
+              "memory_mb": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "test_compose": {
+      "type": "object",
+      "required": ["running"],
+      "properties": {
+        "running": { "type": "boolean" },
+        "services_running": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

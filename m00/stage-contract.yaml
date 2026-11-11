@@ -1,0 +1,94 @@
+# Контракт лаборатории M0. Что студент делает, какие доказательства остаются, чем это проверяется.
+# Проверки (ID и тексты ошибок) описываются отдельно, в спецификации проверок.
+module: m00
+title: Рабочая станция первого инженера
+estimate_hours: [5.75, 9]        # оценка до пилота
+order: [S1, S4a, S2, S3, S5, S6, S7]
+
+stages:
+  - id: S1
+    title: Замеры, профиль, доступность источников
+    competencies: [D2.9]
+    evidence:
+      - docs/capacity-baseline.md       # путь берётся из .course/manifest.yaml
+      - .course/manifest.yaml           # profile и host совпадают с железом
+    levels: [V1, V2]
+
+  - id: S4a
+    title: Репозиторий, подпись, remote вне диска лаборатории
+    competencies: [D3.1, security]
+    evidence:
+      - подписанные коммиты (allowed_signers)
+      - remote на другом носителе
+      - ADR о подписи
+    levels: [V1, V2, V3]
+
+  - id: S2
+    title: Гипервизор и тестовая VM по контракту
+    competencies: [D2.9, D1.2, D1.3]
+    evidence:
+      - вход по ключу работает, по паролю отказ
+      - откат снимка
+      - процедура создания VM в репозитории
+      - ADR о гипервизоре
+    levels: [V1, V2, V3]
+    note: V1 для контракта VM запускается на этом этапе, пока VM существует
+
+  - id: S3
+    title: Docker по требованиям
+    competencies: [D2.9, D1.2]
+    evidence:
+      - daemon.json в репозитории совпадает с действующим
+      - ротация логов у нового контейнера
+      - подсети без пересечений
+      - нет слушателя на 2375 и 2376
+      - тестовый порт недоступен снаружи
+      - merge ветки изменения в истории
+      - ADR о Docker
+    levels: [V1, V2, V3]
+
+  - id: S5
+    title: Скрипт управления v0
+    competencies: [D2.9]
+    evidence:
+      - status --json по схеме и в допусках
+      - up и down видны в status
+      - линтер чистый
+    levels: [V1, V2]
+
+  - id: S6
+    title: Самопроверка
+    competencies: [D1.1, D1.2, D1.3]
+    evidence:
+      - зелёные V1 и V2
+      - ADR прошли рубрику
+      - тег m00-pre-fault
+      - код завершения в Stepik
+    levels: [V1, V2, V3]
+
+  - id: S7
+    title: Слепой отказ и самозащита
+    competencies: [D1.5, D3.1]
+    evidence:
+      - зелёные проверки восстановления
+      - postmortem
+      - ответы на вопросы самозащиты
+      - тестовая VM удалена, образ ОС сохранён
+      - тег m00-accepted в локальном репозитории и в remote
+      - код восстановления в Stepik
+    levels: [V4]
+    fault:
+      mode: random_single       # один отказ, выбранный случайно
+      classes: [platform, history]
+      announced_in_advance: classes_only
+      time_window: none         # окна времени в M0 нет
+
+handoff_to_m1:
+  - гипервизор без VM, с проверенным контрактом
+  - проверенный образ ОС в каталоге образов
+  - процедура создания VM в репозитории
+  - Docker с зафиксированным daemon.json
+  - репозиторий lab-infra с подписанной историей и тегом m00-accepted
+  - bare-remote на другом носителе
+  - ключ доступа и отдельный ключ подписи
+  - скрипт управления v0
